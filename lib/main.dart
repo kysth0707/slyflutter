@@ -1,10 +1,14 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 
 
 import 'APIKey.dart' as KEY;
 import 'Request.dart' as Request;
+import 'TestRequestValue.dart' as Test;
 
 var WebPage = 0;
+String MusicSearchText = '';
 
 void main() {
   // runApp(const MyApp());
@@ -30,11 +34,8 @@ class MyApp extends StatelessWidget {
           children: [
             Container(
                 child: Text('ㅎㅇ',
-                    style: TextStyle(color:Colors.white))
+                  style: TextStyle(color:Colors.white))
             ),
-            IconButton(onPressed: () {
-              print(Request.Get('api.github.com'));
-            }, icon: Icon(Icons.abc, color: Colors.white,)),
           ],
         ),
         bottomNavigationBar: BottomAppBar(
@@ -75,14 +76,52 @@ class MusicSearch extends StatelessWidget{
           children: <Widget>[
             SizedBox(width: 20),
             Expanded(child:
-            TextField(decoration: InputDecoration(
-              enabledBorder: OutlineInputBorder(
-                  borderSide: BorderSide(width: 1, color: Colors.white)),
-            ), style: TextStyle(color: Colors.white)
-            ),
+              TextField(
+                  decoration: InputDecoration(enabledBorder: OutlineInputBorder(borderSide: BorderSide(width: 1, color: Colors.white)),),
+                  style: TextStyle(color: Colors.white),
+                onChanged: (text){
+                    try{
+                      MusicSearchText = text;
+                    }catch(e){
+                      //print(e);
+                    }
+                },
+              ),
             ),
             SizedBox(width: 20),
-            ElevatedButton.icon( onPressed: () { }, icon: Icon(Icons.search, size: 18), label: Text("Search"), ),
+            ElevatedButton.icon( onPressed: () {
+              if(MusicSearchText == ""){
+                showDialog(context: context, builder: (BuildContext context) => AlertDialog(
+                  backgroundColor: Colors.white10,
+                  title: Text('검색 실패', style: TextStyle(color:Colors.white),),
+                  content: Text('검색할 키워드르 입력해주세요!', style: TextStyle(color:Colors.white),),
+                  actions: <Widget>[
+                    TextButton(
+                      onPressed: () => Navigator.pop(context, 'Cancel'),
+                      child: const Text('Cancel'),
+                    ),
+                    TextButton(
+                      onPressed: () => Navigator.pop(context, 'OK'),
+                      child: const Text('OK'),
+                    ),
+                  ],
+                ));
+                return;
+              }
+
+              final String Value = MusicSearchText;
+              const String Limit = "5";
+              final Future<String> future = Request.Get('https://www.googleapis.com/youtube/v3/search?key='+KEY.APIKey+'&part=snippet&order=relevance&q='+Value+'&maxResults='+Limit+'&type=video');
+              future.then((val) {
+                //val = jsonDecode(val);
+                //val = val[0];
+                val = jsonDecode( Test.val.toString() );
+                //val = val['items'];
+                print('val: $val');
+              }).catchError((error) {
+                print('error: $error');
+              });
+            }, icon: Icon(Icons.search, size: 18), label: Text("Search"), ),
             SizedBox(width: 20),
           ],
         ),
@@ -122,7 +161,7 @@ class MusicList extends StatelessWidget{
             title: Text('SLY   -   Save Listen Youtube',
                 style: TextStyle(fontSize: 20))
         ),
-        body: ListView.builder(itemCount: 65,
+        body: ListView.builder(itemCount: 20,
           padding: EdgeInsets.all(10),
           itemBuilder: (BuildContext context, int index){
             return MusicListShow(index);
