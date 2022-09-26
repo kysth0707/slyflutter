@@ -72,57 +72,81 @@ class MusicSearch extends StatelessWidget{
             title: Text('SLY   -   Save Listen Youtube',
                 style: TextStyle(fontSize: 20))
         ),
-        body: Row(
-          children: <Widget>[
-            SizedBox(width: 20),
-            Expanded(child:
-              TextField(
+        body: Column(
+          children: [
+            Row(
+              children: <Widget>[
+                SizedBox(width: 20),
+                Expanded(child:
+                TextField(
                   decoration: InputDecoration(enabledBorder: OutlineInputBorder(borderSide: BorderSide(width: 1, color: Colors.white)),),
                   style: TextStyle(color: Colors.white),
-                onChanged: (text){
+                  onChanged: (text){
                     try{
                       MusicSearchText = text;
                     }catch(e){
                       //print(e);
                     }
-                },
-              ),
-            ),
-            SizedBox(width: 20),
-            ElevatedButton.icon( onPressed: () {
-              if(MusicSearchText == ""){
-                showDialog(context: context, builder: (BuildContext context) => AlertDialog(
-                  backgroundColor: Colors.white10,
-                  title: Text('검색 실패', style: TextStyle(color:Colors.white),),
-                  content: Text('검색할 키워드르 입력해주세요!', style: TextStyle(color:Colors.white),),
-                  actions: <Widget>[
-                    TextButton(
-                      onPressed: () => Navigator.pop(context, 'Cancel'),
-                      child: const Text('Cancel'),
-                    ),
-                    TextButton(
-                      onPressed: () => Navigator.pop(context, 'OK'),
-                      child: const Text('OK'),
-                    ),
-                  ],
-                ));
-                return;
-              }
+                  },
+                ),
+                ),
+                SizedBox(width: 20),
+                ElevatedButton.icon( onPressed: () {
+                  if(MusicSearchText == ""){
+                    showDialog(context: context, builder: (BuildContext context) => AlertDialog(
+                      backgroundColor: Colors.white10,
+                      title: Text('검색 실패', style: TextStyle(color:Colors.white),),
+                      content: Text('검색할 키워드를 입력해주세요!', style: TextStyle(color:Colors.white),),
+                      actions: <Widget>[
+                        TextButton(
+                          onPressed: () => Navigator.pop(context, 'Cancel'),
+                          child: const Text('Cancel'),
+                        ),
+                        TextButton(
+                          onPressed: () => Navigator.pop(context, 'OK'),
+                          child: const Text('OK'),
+                        ),
+                      ],
+                    ));
+                    return;
+                  }
 
-              final String Value = MusicSearchText;
-              const String Limit = "5";
-              final Future<String> future = Request.Get('https://www.googleapis.com/youtube/v3/search?key='+KEY.APIKey+'&part=snippet&order=relevance&q='+Value+'&maxResults='+Limit+'&type=video');
-              future.then((val) {
-                //val = jsonDecode(val);
-                //val = val[0];
-                val = jsonDecode( Test.val.toString() );
-                //val = val['items'];
-                print('val: $val');
-              }).catchError((error) {
-                print('error: $error');
-              });
-            }, icon: Icon(Icons.search, size: 18), label: Text("Search"), ),
-            SizedBox(width: 20),
+                  final String Value = MusicSearchText;
+                  const String Limit = "5";
+                  final Future<String> future = Request.Get('https://www.googleapis.com/youtube/v3/search?key='+KEY.APIKey+'&part=snippet&order=relevance&q='+Value+'&maxResults='+Limit+'&type=video');
+                  future.then((val) {
+                    // print('val: $val');
+                    List<dynamic> items = jsonDecode(val)['items'];
+
+                    // print(items.length);
+                    var Title = (items[0]['snippet']['title']);
+                    var ChannelName = (items[0]['snippet']['channelTitle']);
+                    var PublishTime = (items[0]['snippet']['publishTime']);
+                    var ThumbnailURL = (items[0]['snippet']['thumbnails']['default']['url']);
+
+                  }).catchError((error) {
+                    print('error: $error');
+                  });
+                }, icon: Icon(Icons.search, size: 18), label: Text("Search"), ),
+                SizedBox(width: 20),
+              ],
+            ),
+
+            SizedBox(height: 20,),
+            Container(height: 1, color: Colors.white12,),
+            SizedBox(height: 30,),
+            Text('검색어 : $MusicSearchText', style: TextStyle(color: Colors.white),),
+            SizedBox(height: 30,),
+            Container(height: 1, color: Colors.white12,),
+            SizedBox(height: 20,),
+
+            Expanded(
+              child: ListView.builder(itemCount: 5,
+              padding: EdgeInsets.all(10),
+              itemBuilder: (BuildContext context, int index){
+                return MusicSearchList(index);
+              }),
+            ),
           ],
         ),
 
@@ -145,6 +169,23 @@ class MusicSearch extends StatelessWidget{
           ),
         ),
       ),
+    );
+  }
+
+  Widget MusicSearchList(int index) {
+    return Column(
+      children: [
+        ListTile(
+          title: Text('ㅎㅇ', style: TextStyle(color: Colors.white),),
+          subtitle: Text('ㅎㅇ ${index}', style: TextStyle(color: Colors.white),),
+          leading: Icon(Icons.music_video, color: Colors.white,),
+
+          onTap: (){
+            print(index);
+          },
+        ),
+        Container(height: 1, color: Colors.white12,)
+      ],
     );
   }
 }
@@ -190,6 +231,7 @@ class MusicList extends StatelessWidget{
       ),
     );
   }
+
 
   Widget MusicListShow(int index) {
     return Column(
