@@ -9,6 +9,7 @@ import 'TestRequestValue.dart' as Test;
 
 var WebPage = 0;
 String MusicSearchText = '';
+var MusicSearchCount = 0;
 
 void main() {
   // runApp(const MyApp());
@@ -124,6 +125,9 @@ class MusicSearch extends StatelessWidget{
                     var PublishTime = (items[0]['snippet']['publishTime']);
                     var ThumbnailURL = (items[0]['snippet']['thumbnails']['default']['url']);
 
+                    MusicSearchCount = 5;
+                    setState(() {});
+
                   }).catchError((error) {
                     print('error: $error');
                   });
@@ -141,7 +145,7 @@ class MusicSearch extends StatelessWidget{
             SizedBox(height: 20,),
 
             Expanded(
-              child: ListView.builder(itemCount: 5,
+              child: ListView.builder(itemCount: MusicSearchCount,
               padding: EdgeInsets.all(10),
               itemBuilder: (BuildContext context, int index){
                 return MusicSearchList(index);
@@ -171,6 +175,8 @@ class MusicSearch extends StatelessWidget{
       ),
     );
   }
+
+  // setState
 
   Widget MusicSearchList(int index) {
     return Column(
