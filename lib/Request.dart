@@ -10,6 +10,8 @@ Future<String> Get(String urlString) async {
     //print(Value);
     return Value;
   }else{
+    print(response.statusCode);
+    print(utf8.decode(response.bodyBytes));
     return "?";
   }
 }

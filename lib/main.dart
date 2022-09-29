@@ -10,6 +10,7 @@ var WebPage = 0;
 String MusicSearchText = '';
 var MusicSearchCount = 0;
 List<dynamic> items = jsonDecode('[]');
+List<String> ChannelImageLinks = ['', '', '', '', ''];
 
 
 void main() {
@@ -17,6 +18,26 @@ void main() {
   runApp(MaterialApp(home: MyApp(),));
 }
 
+String TextCut(String text)
+{
+  int Slice = 30;
+  if(text.length < Slice)
+    return text;
+  String ReturnText = '';
+  int i = 0;
+  for(; i < text.length; i+=Slice)
+  {
+    try{
+      ReturnText = ReturnText + text.substring(i, i + Slice) + "\n";
+    }catch (e){
+      try{
+
+      }catch(e){}
+    }
+  }
+  ReturnText = ReturnText + text.substring(i - Slice, text.length);
+  return ReturnText;
+}
 
 
 class Example extends StatefulWidget {
@@ -82,6 +103,20 @@ class _ExampleState extends State<Example> {
                 future.then((val) {
                   // print('val: $val');
                   items = jsonDecode(val)['items'];
+                  // print(items[0]);
+                  for(int i = 0; i < 5; i++){
+                    String ChannelID = items[i]['snippet']['channelId'];
+                    // print(ChannelID);
+                    final Future<String> imgfuture = Request.Get('https://www.googleapis.com/youtube/v3/channels?part=snippet&fields=items%2Fsnippet%2Fthumbnails%2Fdefault&id='+ChannelID+'&key='+KEY.APIKey);
+
+                    imgfuture.then((val2) {
+                      // print(val2);
+                      ChannelImageLinks[i] = jsonDecode(val2)['items'][0]['snippet']['thumbnails']['default']['url'].toString();
+                      // print(ChannelImageLinks[i]+" 입ㅂ니다");
+                    }).catchError((onError) {
+                      print('error ${onError}');
+                    });
+                  }
 
 
                   // print(items.length);
@@ -152,6 +187,46 @@ class _ExampleState extends State<Example> {
 
           onTap: (){
             print(ThumbnailURL);
+            showDialog(context: context,
+              builder: (BuildContext context) {
+                return AlertDialog(
+                  backgroundColor: Colors.black,
+                  content: Stack(
+                    children: <Widget>[
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              Image.network(ThumbnailURL,),
+                              SizedBox(height: 15,),
+                              Text(TextCut(Title), style: TextStyle(color: Colors.white), overflow: TextOverflow.ellipsis,),
+                              SizedBox(height: 50,),
+
+                              Image.network(ChannelImageLinks[index], width: 120),
+                              SizedBox(height: 15,),
+                              Text(ChannelName, style: TextStyle(color: Colors.white), overflow: TextOverflow.ellipsis,),
+                              SizedBox(height: 50,),
+
+
+                              Text(PublishTime, style: TextStyle(color: Colors.white), overflow: TextOverflow.ellipsis,),
+                            ],
+                          ),
+                          Column(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              IconButton(onPressed: () {
+                                Navigator.of(context).pop();
+                              }, icon: Icon(Icons.cancel, color: Colors.white,))
+                            ],
+                          )
+                        ],
+                      ),
+                    ],
+                  ),
+                );
+            });
           },
         ),
         Container(height: 1, color: Colors.white12,)
