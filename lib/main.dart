@@ -7,10 +7,6 @@ import 'APIKey.dart' as KEY;
 import 'Request.dart' as Request;
 
 var WebPage = 0;
-String MusicSearchText = '';
-var MusicSearchCount = 0;
-List<dynamic> items = jsonDecode('[]');
-List<String> ChannelImageLinks = ['', '', '', '', ''];
 
 
 void main() {
@@ -35,10 +31,15 @@ String TextCut(String text)
       }catch(e){}
     }
   }
-  ReturnText = ReturnText + text.substring(i - Slice, text.length);
+  if(i - Slice != 0)
+    ReturnText = ReturnText + text.substring(i - Slice, text.length);
   return ReturnText;
 }
 
+
+String MusicSearchText = '';
+var MusicSearchCount = 0;
+List<dynamic> items = jsonDecode('[]');
 
 class Example extends StatefulWidget {
   Example({Key? key}) : super(key: key);
@@ -78,11 +79,11 @@ class _ExampleState extends State<Example> {
               ),
               SizedBox(width: 20),
               ElevatedButton.icon( onPressed: () {
-                if(MusicSearchText == ""){
+                if(MusicSearchText == "" || MusicSearchText.contains('/')){
                   showDialog(context: context, builder: (BuildContext context) => AlertDialog(
                     backgroundColor: Colors.white10,
                     title: Text('검색 실패', style: TextStyle(color:Colors.white),),
-                    content: Text('검색할 키워드를 입력해주세요!', style: TextStyle(color:Colors.white),),
+                    content: Text("정상적이지 않은 키워드! / 또는 문자열 없음", style: TextStyle(color:Colors.white),),
                     actions: <Widget>[
                       TextButton(
                         onPressed: () => Navigator.pop(context, 'Cancel'),
@@ -98,7 +99,9 @@ class _ExampleState extends State<Example> {
                 }
 
                 final String Value = MusicSearchText;
-                const String Limit = "5";
+                // const String Limit = "5";
+
+                /*
                 final Future<String> future = Request.Get('https://www.googleapis.com/youtube/v3/search?key='+KEY.APIKey+'&part=snippet&order=relevance&q='+Value+'&maxResults='+Limit+'&type=video');
                 future.then((val) {
                   // print('val: $val');
@@ -117,12 +120,15 @@ class _ExampleState extends State<Example> {
                       print('error ${onError}');
                     });
                   }
+                  */
 
-
-                  // print(items.length);
+                final Future<String> future = Request.Get('http://nojam.easylab.kr:7070/get/'+Value+'/');
+                future.then((val) {
+                // print('val: $val');
+                  items = jsonDecode(val);
 
                   setState(() {
-                    MusicSearchCount = 5;
+                    MusicSearchCount = items.length;
                   });
 
                 }).catchError((error) {
@@ -139,7 +145,8 @@ class _ExampleState extends State<Example> {
           Text('검색어 : $MusicSearchText', style: TextStyle(color: Colors.white),),
           SizedBox(height: 30,),
           Container(height: 1, color: Colors.white12,),
-          SizedBox(height: 20,),
+          SizedBox(height: 70,),
+
 
           Expanded(
             child: ListView.builder(itemCount: MusicSearchCount,
@@ -173,20 +180,41 @@ class _ExampleState extends State<Example> {
   }
 
   Widget MusicSearchList(int index) {
+    var Title = (items[index]['Title']);
+    var ChannelName = (items[index]['Owner']);
+    var PublishTime = (items[index]['PublishTime']);
+    var ThumbnailURL = (items[index]['ThumbnailLow']);
+    var OwnerImage = (items[index]['OwnerPictureLink']);
+    var VideoLength = (items[index]['VideoLength']);
+    var ViewShort = (items[index]['ViewShort']);
+    /*
     var Title = (items[index]['snippet']['title']);
     var ChannelName = (items[index]['snippet']['channelTitle']);
     var PublishTime = (items[index]['snippet']['publishTime']);
     var ThumbnailURL = (items[index]['snippet']['thumbnails']['default']['url']);
+    */
     return Column(
       children: [
         ListTile(
           title: Text(Title, style: TextStyle(color: Colors.white),),
-          subtitle: Text('${ChannelName}             ${PublishTime}', style: TextStyle(color: Colors.white),),
+          subtitle: Column(
+              children: [
+                Align(
+                  child: Text('${ViewShort} / ${VideoLength}', style: TextStyle(color: Colors.white),),
+                  alignment: Alignment.centerRight,
+                ),
+                Align(
+                  child: Text('${ChannelName} / ${PublishTime}', style: TextStyle(color: Colors.white),),
+                  alignment: Alignment.centerRight,
+                ),
+              ],
+          ),
+
           // leading: Icon(Icons.music_video, color: Colors.white,),
           leading: Image.network(ThumbnailURL, width: 120),
 
           onTap: (){
-            print(ThumbnailURL);
+            // print(ThumbnailURL);
             showDialog(context: context,
               builder: (BuildContext context) {
                 return AlertDialog(
@@ -204,13 +232,28 @@ class _ExampleState extends State<Example> {
                               Text(TextCut(Title), style: TextStyle(color: Colors.white), overflow: TextOverflow.ellipsis,),
                               SizedBox(height: 50,),
 
-                              Image.network(ChannelImageLinks[index], width: 120),
+                              Image.network(OwnerImage, width: 120),
                               SizedBox(height: 15,),
                               Text(ChannelName, style: TextStyle(color: Colors.white), overflow: TextOverflow.ellipsis,),
-                              SizedBox(height: 50,),
+                              SizedBox(height: 30,),
 
 
-                              Text(PublishTime, style: TextStyle(color: Colors.white), overflow: TextOverflow.ellipsis,),
+                              Text("$PublishTime / $ViewShort / $VideoLength", style: TextStyle(color: Colors.white), overflow: TextOverflow.ellipsis,),
+
+                              SizedBox(height: 70,),
+
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                children: [
+                                  IconButton(onPressed: (){
+
+                                  }, icon: Icon(Icons.play_arrow_sharp), color: Colors.white),
+                                  SizedBox(width: 50,),
+                                  IconButton(onPressed: (){
+
+                                  }, icon: Icon(Icons.save), color: Colors.white),
+                                ],
+                              ),
                             ],
                           ),
                           Column(
