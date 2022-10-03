@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-
+import 'package:flutter_downloader/flutter_downloader.dart';
 
 import 'APIKey.dart' as KEY;
 import 'Request.dart' as Request;
@@ -179,6 +179,26 @@ class _ExampleState extends State<Example> {
     );
   }
 
+  Future<void> _requestDownload(String VideoID, String Title) async{
+    WidgetsFlutterBinding.ensureInitialized();
+
+    // Plugin must be initialized before using
+    await FlutterDownloader.initialize(
+        debug: true, // optional: set to false to disable printing logs to console (default: true)
+        ignoreSsl: true // option: set to false to disable working with http links (default: false)
+    );
+    print(VideoID);
+    print(Title);
+    final taskId = await FlutterDownloader.enqueue(
+      url: 'https://www.youtube.com/watch?v=$VideoID',
+      headers: {}, // optional: header send with url (auth token etc)
+      savedDir: '/download',
+      showNotification: true, // show download progress in status bar (for Android)
+      openFileFromNotification: true, // click on notification to open downloaded file (for Android)
+      fileName: VideoID,
+    );
+  }
+
   Widget MusicSearchList(int index) {
     var Title = (items[index]['Title']);
     var ChannelName = (items[index]['Owner']);
@@ -187,6 +207,7 @@ class _ExampleState extends State<Example> {
     var OwnerImage = (items[index]['OwnerPictureLink']);
     var VideoLength = (items[index]['VideoLength']);
     var ViewShort = (items[index]['ViewShort']);
+    var VideoID = (items[index]['VideoID']);
     /*
     var Title = (items[index]['snippet']['title']);
     var ChannelName = (items[index]['snippet']['channelTitle']);
@@ -250,6 +271,7 @@ class _ExampleState extends State<Example> {
                                   }, icon: Icon(Icons.play_arrow_sharp), color: Colors.white),
                                   SizedBox(width: 50,),
                                   IconButton(onPressed: (){
+                                    _requestDownload(VideoID, Title);
 
                                   }, icon: Icon(Icons.save), color: Colors.white),
                                 ],
