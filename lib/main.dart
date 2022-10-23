@@ -7,10 +7,12 @@ import 'APIKey.dart' as KEY;
 import 'Request.dart' as Request;
 
 var WebPage = 0;
+void main() async{
+  WidgetsFlutterBinding.ensureInitialized();
+  await FlutterDownloader.initialize(
+      debug: true
+  );
 
-
-void main() {
-  // runApp(const MyApp());
   runApp(MaterialApp(home: MyApp(),));
 }
 
@@ -179,25 +181,6 @@ class _ExampleState extends State<Example> {
     );
   }
 
-  Future<void> _requestDownload(String VideoID, String Title) async{
-    WidgetsFlutterBinding.ensureInitialized();
-
-    // Plugin must be initialized before using
-    await FlutterDownloader.initialize(
-        debug: true, // optional: set to false to disable printing logs to console (default: true)
-        ignoreSsl: true // option: set to false to disable working with http links (default: false)
-    );
-    print(VideoID);
-    print(Title);
-    final taskId = await FlutterDownloader.enqueue(
-      url: 'https://www.youtube.com/watch?v=$VideoID',
-      headers: {}, // optional: header send with url (auth token etc)
-      savedDir: '/download',
-      showNotification: true, // show download progress in status bar (for Android)
-      openFileFromNotification: true, // click on notification to open downloaded file (for Android)
-      fileName: VideoID,
-    );
-  }
 
   Widget MusicSearchList(int index) {
     var Title = (items[index]['Title']);
@@ -271,7 +254,8 @@ class _ExampleState extends State<Example> {
                                   }, icon: Icon(Icons.play_arrow_sharp), color: Colors.white),
                                   SizedBox(width: 50,),
                                   IconButton(onPressed: (){
-                                    _requestDownload(VideoID, Title);
+                                  //  Download
+
 
                                   }, icon: Icon(Icons.save), color: Colors.white),
                                 ],
@@ -298,6 +282,11 @@ class _ExampleState extends State<Example> {
       ],
     );
   }
+
+  // Future DownloadMP3()
+  // {
+  //
+  // }
 }
 
 class MyApp extends StatelessWidget {
