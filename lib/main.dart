@@ -8,10 +8,10 @@ import 'Request.dart' as Request;
 
 var WebPage = 0;
 void main() async{
-  WidgetsFlutterBinding.ensureInitialized();
-  await FlutterDownloader.initialize(
-      debug: true
-  );
+  // WidgetsFlutterBinding.ensureInitialized();
+  // await FlutterDownloader.initialize(
+  //     debug: true
+  // );
 
   runApp(MaterialApp(home: MyApp(),));
 }
